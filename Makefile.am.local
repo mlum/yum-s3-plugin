@@ -1,0 +1,8 @@
+# put whatever (auto)make commands here, they will be included from Makefile.am
+
+s3yumplugindir = /usr/lib/yum-plugins
+s3yumplugin_DATA = src/s3.py
+
+s3yumpluginconfdir = /etc/yum/pluginconf.d
+s3yumpluginconf_DATA = s3.conf
+
