@@ -22,10 +22,15 @@ S3 bucket can be make public. Public buckets can be accessed with plain http.
 This is where yum-s3 kicks in. yum-s3 uses the Boto library to fetch
 objects from S3, which allows using credentials.
 
+# Build
+
+- see http://code.google.com/p/fwtemplates/
+- run ./bootstrap ; ./build
+
 # Install
 
-- run ./package to build a RPM
-- install
+- run make package-rpm
+- get the RPM in fw-pkgout
 
 # How to configure a S3 based repo
 
@@ -38,6 +43,8 @@ objects from S3, which allows using credentials.
     s3_enabled=1
     key_id=<YOURKEY>
     secret_key=<YOURSECRET>
+
+put this into a .repo file in /etc/yum.repos.d/
 
 # YUM edge cases (baseurl)
 
