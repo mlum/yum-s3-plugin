@@ -2,7 +2,7 @@
 # variable FW_PACKAGE_DEFAULT_MAINTAINER if non-empty at init time
 
 FW_PACKAGE_NAME="yum-s3-plugin"
-FW_PACKAGE_VERSION="0.0.0"
+FW_PACKAGE_VERSION="0.0.1"
 FW_PACKAGE_MAINTAINER="Michael Lum <mike@mikelum.com>"
 FW_PACKAGE_SHORT_DESCRIPTION="A S3 plugin for Yum."
 FW_PACKAGE_DESCRIPTION=`cat README.md`
