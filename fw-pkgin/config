@@ -38,7 +38,7 @@ FW_DUPLOAD_ARGS=${FW_DUPLOAD_ARGS-"-q"}
 
 FW_RPM_REPO_USER=${FW_RPM_REPO_USER-"`whoami`"}
 FW_RPM_REPO_HOST=${FW_RPM_REPO_HOST-"localhost"}
-FW_RPM_REPO_BASEDIR=${FW_RPM_REPO_BASEDIR-""}
+FW_RPM_REPO_BASEDIR=${FW_RPM_REPO_BASEDIR-"/var/yum"}
 FW_RPM_CREATEREPO_ARGS=${FW_RPM_CREATEREPO_ARGS-"-q --database"}
 
 # this variable controls whether createrepo is run incrementally (--update).
