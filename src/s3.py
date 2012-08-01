@@ -49,6 +49,7 @@ def createUrllibGrabber():
     """
     import os
     import sys
+    import re
     import urllib2
     import time, hmac, base64, hashlib
 
@@ -58,9 +59,9 @@ def createUrllibGrabber():
         def s3sign(cls,request, secret_key, key_id, date=None):
                 date=time.strftime("%a, %d %b %Y %H:%M:%S +0000", date or time.gmtime() )
                 host = request.get_host()
-                bucket = host.split('.')[0]
+                bucket = re.match('(.*)\.s3.*\.amazonaws\.com', host).group(1)
                 request.add_header('Date', date)
-                resource = "/%s%s" % ( bucket, request.get_selector() )
+                resource = "/%s%s" % (bucket, request.get_selector())
                 sigstring = """%(method)s\n\n\n%(date)s\n%(canon_amzn_resource)s""" % {
                                            'method':request.get_method(),
                                            #'content_md5':'',
@@ -69,7 +70,7 @@ def createUrllibGrabber():
                                            #'canon_amzn_headers':'',
                                            'canon_amzn_resource':resource }
                 digest = hmac.new(secret_key, sigstring, hashlib.sha1 ).digest()
-                digest = base64.b64encode(digest)
+                digest = base64.b64encode(digest).strip()
                 request.add_header('Authorization', "AWS %s:%s" % ( key_id,  digest ))
 
         def __init__(self, awsAccessKey, awsSecretKey, baseurl ):
@@ -78,6 +79,7 @@ def createUrllibGrabber():
             self.baseurl = baseurl
             self.awsAccessKey = awsAccessKey
             self.awsSecretKey = awsSecretKey
+            self.logger = logging.getLogger("yum.verbose.main")
 
         def _request(self,url):
             req = urllib2.Request("%s%s" % (self.baseurl, url))
@@ -86,26 +88,31 @@ def createUrllibGrabber():
 
         def urlgrab(self, url, filename=None, **kwargs):
             """urlgrab(url) copy the file to the local filesystem"""
-#            self.verbose_logger.log(logginglevels.DEBUG_4, "UrlLibGrabber urlgrab url=%s filename=%s" % ( url, filename ))
+            self.logger.log(logginglevels.DEBUG_4, "UrlLibGrabber urlgrab url=%s filename=%s" % ( url, filename ))
             req = self._request(url)
             if not filename:
                 filename = req.get_selector()
                 if filename[0] == '/': filename = filename[1:]
             out = open(filename, 'w+')
-            resp = urllib2.urlopen(req)
-            buff = resp.read(8192)
-            while buff:
-                out.write(buff)
+            try:
+                resp = urllib2.urlopen(req)
                 buff = resp.read(8192)
+                while buff:
+                    out.write(buff)
+                    buff = resp.read(8192)
+            except urllib2.HTTPError, e:
+                interactive_notify(e.read())
             return filename
             # zzz - does this return a value or something?
 
         def urlopen(self, url, **kwargs):
             """urlopen(url) open the remote file and return a file object"""
+            self.logger.debug("urlopen " % url)
             return urllib2.urlopen( self._request(url) )
 
         def urlread(self, url, limit=None, **kwargs):
             """urlread(url) return the contents of the file as a string"""
+            self.logger.debug("urlread " % url)
             return urllib2.urlopen( self._request(url) ).read()
 
     return UrllibGrabber
@@ -136,6 +143,7 @@ def createBotoGrabber():
             # self.baseurl[1] is self.baseurl.netloc; self.baseurl[2] is self.baseurl.path
             # See http://docs.python.org/library/urlparse.html
             self.baseurl = urlparse(baseurl)
+            # TODO: chokes on s3.amazonaws.com/bucketname queries
             self.bucket_name = re.match('(.*)\.s3.*\.amazonaws\.com', self.baseurl[1]).group(1)
             self.key_prefix = self.baseurl[2][1:]
 
