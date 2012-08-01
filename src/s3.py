@@ -68,7 +68,7 @@ def createUrllibGrabber():
                                            'date':request.headers.get('Date'),
                                            #'canon_amzn_headers':'',
                                            'canon_amzn_resource':resource }
-                digest = hmac.new(secret_key, sigstring, hashlib.sha() ).digest()
+                digest = hmac.new(secret_key, sigstring, hashlib.sha1 ).digest()
                 digest = base64.b64encode(digest)
                 request.add_header('Authorization', "AWS %s:%s" % ( key_id,  digest ))
 
@@ -86,7 +86,7 @@ def createUrllibGrabber():
 
         def urlgrab(self, url, filename=None, **kwargs):
             """urlgrab(url) copy the file to the local filesystem"""
-            self.verbose_logger.log(logginglevels.DEBUG_4, "UrlLibGrabber urlgrab url=%s filename=%s" % ( url, filename ))
+#            self.verbose_logger.log(logginglevels.DEBUG_4, "UrlLibGrabber urlgrab url=%s filename=%s" % ( url, filename ))
             req = self._request(url)
             if not filename:
                 filename = req.get_selector()
