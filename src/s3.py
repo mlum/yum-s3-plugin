@@ -50,7 +50,7 @@ def createUrllibGrabber():
     import os
     import sys
     import urllib2
-    import time, sha, hmac, base64
+    import time, hmac, base64, hashlib
 
     class UrllibGrabber:
         @classmethod
@@ -68,7 +68,7 @@ def createUrllibGrabber():
                                            'date':request.headers.get('Date'),
                                            #'canon_amzn_headers':'',
                                            'canon_amzn_resource':resource }
-                digest = hmac.new(secret_key, sigstring, sha ).digest()
+                digest = hmac.new(secret_key, sigstring, hashlib.sha() ).digest()
                 digest = base64.b64encode(digest)
                 request.add_header('Authorization', "AWS %s:%s" % ( key_id,  digest ))
 
