@@ -45,7 +45,7 @@ def interactive_notify(msg):
 
 def createUrllibGrabber():
     """
-    Fetch files from AWS without boto. This code has not been tested on RHEL 6 as EPEL ships with boto 2.x.
+    Fetch files from AWS without boto.
     """
     import os
     import sys
@@ -59,7 +59,10 @@ def createUrllibGrabber():
         def s3sign(cls,request, secret_key, key_id, date=None):
                 date=time.strftime("%a, %d %b %Y %H:%M:%S +0000", date or time.gmtime() )
                 host = request.get_host()
-                bucket = re.match('(.*)\.s3.*\.amazonaws\.com', host).group(1)
+                if host.lower() == "s3.amazonaws.com":
+                    bucket = request.get_selector().split('/')[0]
+                else:
+                    bucket = re.match('(.*)\.s3.*\.amazonaws\.com', host).group(1)
                 request.add_header('Date', date)
                 resource = "/%s%s" % (bucket, request.get_selector())
                 sigstring = """%(method)s\n\n\n%(date)s\n%(canon_amzn_resource)s""" % {
@@ -143,8 +146,11 @@ def createBotoGrabber():
             # self.baseurl[1] is self.baseurl.netloc; self.baseurl[2] is self.baseurl.path
             # See http://docs.python.org/library/urlparse.html
             self.baseurl = urlparse(baseurl)
-            # TODO: chokes on s3.amazonaws.com/bucketname queries
-            self.bucket_name = re.match('(.*)\.s3.*\.amazonaws\.com', self.baseurl[1]).group(1)
+            if re.match('http://s3\.amazonaws\.com/', self.baseurl[1]) == None:
+                self.bucket_name = re.match('(.*)\.s3.*\.amazonaws\.com', self.baseurl[1]).group(1)
+            else:
+                self.bucket_name = re.match('http://(.*)s3.*\.amazonaws\.com/(.*?)/.*', self.baseurl[1]).group(2)
+
             self.key_prefix = self.baseurl[2][1:]
 
         def _handle_s3(self, awsAccessKey, awsSecretKey):
